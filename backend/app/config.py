@@ -1,10 +1,13 @@
-from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+ENV_FILE = BASE_DIR / ".env"
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(env_file=str(ENV_FILE), env_file_encoding="utf-8", extra="ignore")
 
     app_name: str = "USV Events API"
     debug: bool = False
@@ -24,6 +27,5 @@ class Settings(BaseSettings):
     bootstrap_admin_password: str = ""
 
 
-@lru_cache
 def get_settings() -> Settings:
     return Settings()

@@ -1,0 +1,71 @@
+@import './base.css';
+
+#app {
+  min-height: 100vh;
+}
+
+a {
+  color: #1e4d8f;
+  text-decoration: none;
+}
+
+a.router-link-active {
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.form-row {
+  margin-bottom: 0.8rem;
+}
+
+.btn {
+  border: 0;
+  background: #1e4d8f;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+}
+
+.btn.secondary {
+  background: #5a5a5a;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e3e3e3;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.error {
+  color: #b00020;
+  margin: 0.5rem 0;
+}
+
+.success {
+  color: #0f7a2f;
+  margin: 0.5rem 0;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+}
