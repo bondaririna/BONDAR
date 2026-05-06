@@ -1,5 +1,7 @@
+"""Modelele ORM principale pentru utilizatori, evenimente si feedback."""
+
 import enum
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -8,7 +10,13 @@ from app.database import Base
 
 
 def _enum_values(enum_cls: type[enum.Enum]) -> list[str]:
+    """Returneaza valorile text ale unei enumerari."""
     return [m.value for m in enum_cls]
+
+
+def _utcnow() -> datetime:
+    """Returneaza timpul curent UTC ca datetime naive pentru compatibilitate DB."""
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 class UserRole(str, enum.Enum):
@@ -40,6 +48,8 @@ class EventStatus(str, enum.Enum):
 
 
 class User(Base):
+    """Entitatea utilizator din platforma (student, organizator sau admin)."""
+
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -51,7 +61,7 @@ class User(Base):
     )
     google_sub: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     events_organized: Mapped[list["Event"]] = relationship(
         "Event", back_populates="organizer_user", foreign_keys="Event.organizer_user_id"
@@ -60,6 +70,8 @@ class User(Base):
 
 
 class Event(Base):
+    """Entitatea eveniment universitar, cu datele necesare publicarii."""
+
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -87,8 +99,8 @@ class Event(Base):
         nullable=False,
         default=EventStatus.PENDING,
     )
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
 
     organizer_user: Mapped["User | None"] = relationship(
         "User", back_populates="events_organized", foreign_keys=[organizer_user_id]
@@ -97,6 +109,8 @@ class Event(Base):
 
 
 class EventFeedback(Base):
+    """Feedback oferit de un student pentru un eveniment incheiat."""
+
     __tablename__ = "event_feedback"
     __table_args__ = (UniqueConstraint("event_id", "user_id", name="uq_feedback_event_user"),)
 
@@ -105,7 +119,7 @@ class EventFeedback(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     rating: Mapped[float] = mapped_column(Float, nullable=False)
     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 
     event: Mapped["Event"] = relationship("Event", back_populates="feedbacks")
     user: Mapped["User"] = relationship("User", back_populates="feedbacks")

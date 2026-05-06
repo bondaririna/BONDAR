@@ -1,3 +1,5 @@
+"""Scheme Pydantic pentru validarea cererilor si raspunsurilor API."""
+
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
@@ -5,20 +7,28 @@ from app.models import EventCategory, EventStatus, ParticipationMode, UserRole
 
 
 class TokenResponse(BaseModel):
+    """Raspuns standard pentru autentificare bazata pe token."""
+
     access_token: str
     token_type: str = "bearer"
 
 
 class GoogleAuthRequest(BaseModel):
+    """Payload pentru autentificarea studentului prin Google OAuth."""
+
     id_token: str = Field(..., min_length=10, description="Google ID token (JWT) from client Sign-In")
 
 
 class LoginRequest(BaseModel):
+    """Datele de autentificare cu utilizator/parola pentru staff."""
+
     username: str = Field(..., min_length=1, description="Email sau nume utilizator")
     password: str = Field(..., min_length=1)
 
 
 class UserPublic(BaseModel):
+    """Reprezentarea publica a unui utilizator."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -38,6 +48,8 @@ class UserCreateStaff(BaseModel):
 
 
 class EventBase(BaseModel):
+    """Campurile comune folosite la creare/citire eveniment."""
+
     title: str = Field(..., min_length=1, max_length=500)
     description: str = ""
     start_at: datetime
@@ -55,16 +67,21 @@ class EventBase(BaseModel):
 
     @model_validator(mode="after")
     def end_after_start(self) -> "EventBase":
+        """Valideaza ca data de final nu este inaintea datei de start."""
         if self.end_at < self.start_at:
             raise ValueError("end_at trebuie să fie după sau la start_at")
         return self
 
 
 class EventCreate(EventBase):
+    """Payload folosit la crearea unui eveniment."""
+
     status: EventStatus | None = None
 
 
 class EventUpdate(BaseModel):
+    """Payload partial pentru actualizarea unui eveniment existent."""
+
     title: str | None = Field(None, min_length=1, max_length=500)
     description: str | None = None
     start_at: datetime | None = None
@@ -83,6 +100,8 @@ class EventUpdate(BaseModel):
 
 
 class EventRead(EventBase):
+    """Model de raspuns complet pentru un eveniment."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -93,6 +112,8 @@ class EventRead(EventBase):
 
 
 class EventListFilters(BaseModel):
+    """Filtre disponibile pentru listarea evenimentelor."""
+
     faculty_or_department: str | None = None
     date_from: datetime | None = None
     date_to: datetime | None = None
@@ -107,11 +128,15 @@ class EventListFilters(BaseModel):
 
 
 class FeedbackCreate(BaseModel):
+    """Payload pentru trimiterea feedback-ului de catre student."""
+
     rating: float = Field(..., ge=1, le=5)
     comment: str | None = Field(None, max_length=5000)
 
 
 class FeedbackRead(BaseModel):
+    """Model de raspuns pentru feedback-ul salvat."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -123,4 +148,6 @@ class FeedbackRead(BaseModel):
 
 
 class EventValidateBody(BaseModel):
+    """Payload pentru validarea administrativa a unui eveniment."""
+
     status: EventStatus = Field(..., description="published sau rejected")

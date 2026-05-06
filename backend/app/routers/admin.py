@@ -1,3 +1,5 @@
+"""Rute administrative pentru organizatori si validarea evenimentelor."""
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -16,6 +18,10 @@ def create_organizer(
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ) -> User:
+    """Creeaza un cont nou de organizator.
+
+    Ruta este disponibila doar administratorului si accepta exclusiv rolul organizer.
+    """
     if body.role != UserRole.ORGANIZER:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Rolul trebuie să fie organizer")
     email = body.email.strip().lower()
@@ -41,6 +47,10 @@ def set_event_status(
     db: Session = Depends(get_db),
     _: User = Depends(require_admin),
 ) -> Event:
+    """Seteaza statusul unui eveniment la published sau rejected.
+
+    Folosit in fluxul de validare administrativa inainte de publicare.
+    """
     ev = db.query(Event).filter(Event.id == event_id).first()
     if not ev:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Eveniment inexistent")

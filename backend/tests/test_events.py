@@ -1,6 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
+
+
+def _utcnow() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 def test_list_events_empty(client: TestClient) -> None:
@@ -12,7 +16,7 @@ def test_list_events_empty(client: TestClient) -> None:
 def test_create_event_as_organizer_pending(
     client: TestClient, organizer_token: str, organizer_user
 ) -> None:
-    start = datetime.utcnow() + timedelta(days=1)
+    start = _utcnow() + timedelta(days=1)
     end = start + timedelta(hours=2)
     r = client.post(
         "/api/v1/events",
@@ -38,7 +42,7 @@ def test_create_event_as_organizer_pending(
 def test_public_list_hides_pending(
     client: TestClient, organizer_token: str
 ) -> None:
-    start = datetime.utcnow() + timedelta(days=2)
+    start = _utcnow() + timedelta(days=2)
     end = start + timedelta(hours=1)
     client.post(
         "/api/v1/events",
@@ -63,7 +67,7 @@ def test_public_list_hides_pending(
 def test_admin_publish_makes_visible(
     client: TestClient, organizer_token: str, admin_token: str
 ) -> None:
-    start = datetime.utcnow() + timedelta(days=3)
+    start = _utcnow() + timedelta(days=3)
     end = start + timedelta(hours=1)
     cr = client.post(
         "/api/v1/events",
@@ -94,8 +98,8 @@ def test_admin_publish_makes_visible(
 def test_feedback_after_event(
     client: TestClient, organizer_token: str, admin_token: str, student_token: str
 ) -> None:
-    start = datetime.utcnow() - timedelta(days=2)
-    end = datetime.utcnow() - timedelta(days=1)
+    start = _utcnow() - timedelta(days=2)
+    end = _utcnow() - timedelta(days=1)
     cr = client.post(
         "/api/v1/events",
         headers={"Authorization": f"Bearer {organizer_token}"},
@@ -124,3 +128,77 @@ def test_feedback_after_event(
     )
     assert r.status_code == 201
     assert r.json()["rating"] == 5
+
+
+def test_feedback_rejected_before_event_end(
+    client: TestClient, organizer_token: str, admin_token: str, student_token: str
+) -> None:
+    start = _utcnow() - timedelta(hours=1)
+    end = _utcnow() + timedelta(hours=2)
+    cr = client.post(
+        "/api/v1/events",
+        headers={"Authorization": f"Bearer {organizer_token}"},
+        json={
+            "title": "In progress",
+            "description": "",
+            "start_at": start.isoformat(),
+            "end_at": end.isoformat(),
+            "location": "A1",
+            "faculty_or_department": "",
+            "category": "academic",
+            "participation_mode": "hybrid",
+            "organizer_name": "X",
+        },
+    )
+    eid = cr.json()["id"]
+    client.patch(
+        f"/api/v1/admin/events/{eid}/status",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={"status": "published"},
+    )
+    r = client.post(
+        f"/api/v1/events/{eid}/feedback",
+        headers={"Authorization": f"Bearer {student_token}"},
+        json={"rating": 4, "comment": "prea devreme"},
+    )
+    assert r.status_code == 400
+
+
+def test_feedback_duplicate_rejected(
+    client: TestClient, organizer_token: str, admin_token: str, student_token: str
+) -> None:
+    start = _utcnow() - timedelta(days=3)
+    end = _utcnow() - timedelta(days=1)
+    cr = client.post(
+        "/api/v1/events",
+        headers={"Authorization": f"Bearer {organizer_token}"},
+        json={
+            "title": "Done event",
+            "description": "",
+            "start_at": start.isoformat(),
+            "end_at": end.isoformat(),
+            "location": "A2",
+            "faculty_or_department": "",
+            "category": "career",
+            "participation_mode": "online",
+            "organizer_name": "X",
+        },
+    )
+    eid = cr.json()["id"]
+    client.patch(
+        f"/api/v1/admin/events/{eid}/status",
+        headers={"Authorization": f"Bearer {admin_token}"},
+        json={"status": "published"},
+    )
+    first = client.post(
+        f"/api/v1/events/{eid}/feedback",
+        headers={"Authorization": f"Bearer {student_token}"},
+        json={"rating": 5, "comment": "super"},
+    )
+    assert first.status_code == 201
+    second = client.post(
+        f"/api/v1/events/{eid}/feedback",
+        headers={"Authorization": f"Bearer {student_token}"},
+        json={"rating": 4, "comment": "inca unul"},
+    )
+    assert second.status_code == 409

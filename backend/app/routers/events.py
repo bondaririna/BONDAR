@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import or_
@@ -10,6 +10,11 @@ from app.models import Event, EventCategory, EventFeedback, EventStatus, Partici
 from app.schemas import EventCreate, EventRead, EventUpdate, FeedbackCreate, FeedbackRead
 
 router = APIRouter(prefix="/events", tags=["events"])
+
+
+def _utcnow() -> datetime:
+    """Returneaza timpul curent UTC ca datetime naive pentru comparatii DB."""
+    return datetime.now(UTC).replace(tzinfo=None)
 
 
 @router.get("", response_model=list[EventRead])
@@ -176,7 +181,7 @@ def add_feedback(
     ev = db.query(Event).filter(Event.id == event_id).first()
     if not ev or ev.status != EventStatus.PUBLISHED:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Eveniment inexistent")
-    now = datetime.utcnow()
+    now = _utcnow()
     if now < ev.end_at:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
