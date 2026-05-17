@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.bootstrap import ensure_bootstrap_admin
+from app.bootstrap import ensure_bootstrap_admin, ensure_bootstrap_organizer
 from app.config import get_settings
 from app.database import Base, SessionLocal, engine
 from app.routers import admin, auth, events, health
@@ -17,6 +17,7 @@ async def lifespan(_: FastAPI):
     db = SessionLocal()
     try:
         ensure_bootstrap_admin(db)
+        ensure_bootstrap_organizer(db)
     finally:
         db.close()
     yield

@@ -43,10 +43,9 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('access_token', data.access_token)
         await this.fetchMe()
       } catch (error) {
-        this.error = getApiError(
-          error,
-          'Autentificarea Google a esuat. Foloseste un cont @student.usv.ro',
-        )
+        this.error =
+          getApiError(error, 'Autentificarea Google a esuat. Foloseste un cont @student.usv.ro') +
+          (error?.response?.data?.detail ? ` (${error.response.data.detail})` : '')
         throw error
       } finally {
         this.loading = false

@@ -82,20 +82,34 @@ onMounted(async () => {
 
 <template>
   <div class="login-layout">
-    <section class="card login-card">
-      <h2>Autentificare Google)</h2>
-      <div ref="googleContainer" class="google-button-wrap" />
-      <p v-if="!googleReady && !googleError">Se incarca Google Sign-In...</p>
-      <p v-if="googleError" class="error">{{ googleError }}</p>
-      <p v-if="auth.error" class="error">{{ auth.error }}</p>
+    <section class="card hero">
+      <p class="pill">Acces securizat</p>
+      <h2>Intră în cont pentru a continua</h2>
+      <p class="muted">
+        Studenți: Google Sign-In @student.usv.ro pentru funcționalitățile critice (feedback, înscriere).
+        Organizatori/Admin: autentificare cu user/parolă pentru gestionare evenimente și validare.
+      </p>
+      <ul>
+        <li>Protecție cu token Bearer</li>
+        <li>Roluri: student / organizer / admin</li>
+        <li>Acces diferențiat la rute și acțiuni</li>
+      </ul>
     </section>
 
     <section class="card login-card">
-      <h2>Autentificare</h2>
+      <h3>Autentificare Google (student)</h3>
+      <div ref="googleContainer" class="google-button-wrap" />
+      <p v-if="!googleReady && !googleError">Se încarcă Google Sign-In...</p>
+      <p v-if="googleError" class="error">{{ googleError }}</p>
+      <p v-if="auth.error && !googleError" class="error">{{ auth.error }}</p>
+    </section>
+
+    <section class="card login-card">
+      <h3>Autentificare cu parolă (organizer/admin)</h3>
       <form @submit.prevent="onSubmit">
         <div class="form-row">
           <label for="username">Email</label>
-          <input id="username" v-model="form.username" type="email" required />
+          <input id="username" v-model="form.username" type="email" required placeholder="ex: organizator@usv.ro" />
         </div>
         <div class="form-row">
           <label for="password">Parola</label>
@@ -103,7 +117,7 @@ onMounted(async () => {
         </div>
         <p v-if="auth.error" class="error">{{ auth.error }}</p>
         <button class="btn" type="submit" :disabled="auth.loading">
-          {{ auth.loading ? 'Se autentifica...' : 'Login' }}
+          {{ auth.loading ? 'Se autentifică...' : 'Login' }}
         </button>
       </form>
     </section>
@@ -112,12 +126,23 @@ onMounted(async () => {
 
 <style scoped>
 .login-layout {
-  min-height: calc(100vh - 180px);
   display: grid;
-  grid-template-columns: repeat(2, minmax(320px, 460px));
-  justify-content: center;
-  align-content: center;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 420px));
   gap: 1rem;
+  align-items: start;
+}
+
+.hero {
+  grid-column: 1 / -1;
+  background: radial-gradient(circle at 25% 20%, #e8f1ff 0, #fff 35%), #fff;
+}
+
+.hero ul {
+  margin: 0.6rem 0 0;
+  padding-left: 1.1rem;
+  color: #3d4a5f;
+  display: grid;
+  gap: 0.25rem;
 }
 
 .login-card {
@@ -128,13 +153,5 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   margin: 0.75rem 0;
-}
-
-@media (max-width: 900px) {
-  .login-layout {
-    min-height: auto;
-    grid-template-columns: minmax(280px, 520px);
-    align-content: start;
-  }
 }
 </style>

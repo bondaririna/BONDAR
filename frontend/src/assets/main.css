@@ -2,10 +2,11 @@
 
 #app {
   min-height: 100vh;
+  background: #f5f7fb;
 }
 
 a {
-  color: #1e4d8f;
+  color: #1f64c6;
   text-decoration: none;
 }
 
@@ -17,10 +18,18 @@ input,
 select,
 textarea {
   width: 100%;
-  border: 1px solid #cfcfcf;
-  border-radius: 8px;
-  padding: 0.55rem 0.7rem;
+  border: 1px solid #d7dbe6;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
   font: inherit;
+  background: #fff;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #c9dcff;
+  border-color: #8fb3ff;
 }
 
 label {
@@ -30,28 +39,44 @@ label {
 }
 
 .form-row {
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.9rem;
 }
 
 .btn {
   border: 0;
-  background: #1e4d8f;
+  background: linear-gradient(135deg, #1f64c6, #2d8bff);
   color: #fff;
-  border-radius: 8px;
-  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+  padding: 0.55rem 0.95rem;
   cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.12s ease;
+  box-shadow: 0 8px 20px rgba(45, 139, 255, 0.18);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
 }
 
 .btn.secondary {
-  background: #5a5a5a;
+  background: #eef2f7;
+  color: #1f2c3d;
+  box-shadow: none;
+}
+
+.btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .card {
   background: #fff;
-  border: 1px solid #e3e3e3;
-  border-radius: 12px;
-  padding: 1rem;
+  border: 1px solid #e6eaf2;
+  border-radius: 14px;
+  padding: 1.2rem;
   margin-bottom: 1rem;
+  box-shadow: 0 10px 30px rgba(31, 64, 135, 0.05);
 }
 
 .error {
@@ -66,6 +91,28 @@ label {
 
 .grid-2 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.2rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #1f64c6;
+  font-weight: 600;
+  font-size: 0.9rem;
 }

@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     bootstrap_admin_email: str = "admin@local.test"
     bootstrap_admin_password: str = ""
 
+    bootstrap_organizer_email: str = "organizer@local.test"
+    bootstrap_organizer_password: str = ""
+
 
 def get_settings() -> Settings:
     return Settings()

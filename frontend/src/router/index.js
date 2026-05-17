@@ -6,6 +6,7 @@ import EventsView from '@/views/EventsView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import NewEventView from '@/views/NewEventView.vue'
+import OrganizerEventsView from '@/views/OrganizerEventsView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -13,6 +14,12 @@ const router = createRouter({
     { path: '/', name: 'home', component: HomeView },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/events', name: 'events', component: EventsView },
+    {
+      path: '/organizer/events',
+      name: 'organizer-events',
+      component: OrganizerEventsView,
+      meta: { requiresAuth: true, roles: ['organizer', 'admin'] },
+    },
     {
       path: '/organizer/new-event',
       name: 'new-event',

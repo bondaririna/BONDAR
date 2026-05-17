@@ -22,3 +22,22 @@ def ensure_bootstrap_admin(db: Session) -> None:
     )
     db.add(admin)
     db.commit()
+
+
+def ensure_bootstrap_organizer(db: Session) -> None:
+    settings = get_settings()
+    pwd = settings.bootstrap_organizer_password.strip()
+    if not pwd:
+        return
+    email = settings.bootstrap_organizer_email.strip().lower()
+    if db.query(User).filter(User.email == email).first():
+        return
+    org = User(
+        email=email,
+        full_name="Organizer Bootstrap",
+        role=UserRole.ORGANIZER,
+        hashed_password=hash_password(pwd),
+        is_active=True,
+    )
+    db.add(org)
+    db.commit()
